@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func GenerateNIK(people models.People, input ...string) string {
+func GenerateNIK(people models.People) string {
 	var nik string
 	var dobString string
 	var randomNumber int
