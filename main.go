@@ -72,6 +72,7 @@ func main() {
 
 	//router people
 	router.GET("/people", controllers.GetPeople)
+	router.GET("/people/:nik", controllers.GetPeopleByNIK)
 	router.POST("/people", controllers.CreatePeople)
 	router.PUT("/people/:id", controllers.UpdatePeople)
 	router.DELETE("/people/:id", controllers.DeletePeople)

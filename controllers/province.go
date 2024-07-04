@@ -4,7 +4,6 @@ import (
 	"data-penduduk/models"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -62,7 +61,7 @@ func CreateProvince(c *gin.Context) {
 
 func UpdateProvince(c *gin.Context) {
 	sqlStatement := `UPDATE province SET name=$1, updated_at=$2 WHERE id=$3`
-	id, _ := strconv.Atoi(c.Param("id"))
+	id := c.Param("id")
 	fmt.Println(id)
 	var province models.Province
 
@@ -74,11 +73,24 @@ func UpdateProvince(c *gin.Context) {
 	}
 	province.UpdatedAt = time.Now()
 
-	_, err := db.Exec(sqlStatement, province.Name, province.UpdatedAt, id)
+	result, err := db.Exec(sqlStatement, province.Name, province.UpdatedAt, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
+		})
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Province with ID not found",
 		})
 		return
 	}
@@ -90,14 +102,31 @@ func UpdateProvince(c *gin.Context) {
 
 func DeleteProvince(c *gin.Context) {
 	sqlStatement := `DELETE FROM province WHERE id=$1`
-	id, _ := strconv.Atoi(c.Param("id"))
-	_, err := db.Exec(sqlStatement, id)
+	id := c.Param("id")
+
+	result, err := db.Exec(sqlStatement, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Province with ID not found",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Delete Province Successfully",
 	})
