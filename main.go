@@ -3,6 +3,7 @@ package main
 import (
 	"data-penduduk/controllers"
 	"data-penduduk/database"
+	"data-penduduk/middleware"
 	"database/sql"
 	"fmt"
 	"log"
@@ -55,27 +56,31 @@ func main() {
 	// router province
 	router.GET("/province", controllers.GetProvince)
 	router.POST("/province", controllers.CreateProvince)
-	router.PUT("/province/:id", controllers.UpdateProvince)
-	router.DELETE("/province/:id", controllers.DeleteProvince)
+	router.PUT("/province/:id", middleware.AuthMiddleware(), controllers.UpdateProvince)
+	router.DELETE("/province/:id", middleware.AuthMiddleware(), controllers.DeleteProvince)
 
 	//router regency
 	router.GET("/regency", controllers.GetRegency)
 	router.POST("/regency", controllers.CreateRegency)
-	router.PUT("/regency/:id", controllers.UpdateRegency)
-	router.DELETE("/regency/:id", controllers.DeleteRegency)
+	router.PUT("/regency/:id", middleware.AuthMiddleware(), controllers.UpdateRegency)
+	router.DELETE("/regency/:id", middleware.AuthMiddleware(), controllers.DeleteRegency)
 
 	//router district
 	router.GET("/district", controllers.GetDistrict)
 	router.POST("/district", controllers.CreateDistrict)
-	router.PUT("/district/:id", controllers.UpdateDistrict)
-	router.DELETE("/district/:id", controllers.DeleteDistrict)
+	router.PUT("/district/:id", middleware.AuthMiddleware(), controllers.UpdateDistrict)
+	router.DELETE("/district/:id", middleware.AuthMiddleware(), controllers.DeleteDistrict)
 
 	//router people
 	router.GET("/people", controllers.GetPeople)
 	router.GET("/people/:nik", controllers.GetPeopleByNIK)
-	router.POST("/people", controllers.CreatePeople)
-	router.PUT("/people/:id", controllers.UpdatePeople)
-	router.DELETE("/people/:id", controllers.DeletePeople)
+	router.POST("/people", middleware.AuthMiddleware(), controllers.CreatePeople)
+	router.PUT("/people/:id", middleware.AuthMiddleware(), controllers.UpdatePeople)
+	router.DELETE("/people/:id", middleware.AuthMiddleware(), controllers.DeletePeople)
+
+	//router user
+	router.POST("auth/register", controllers.Register)
+	router.POST("auth/login", controllers.Login)
 
 	fmt.Println("server running at http://localhost:8080")
 	if err := router.Run(); err != nil {
