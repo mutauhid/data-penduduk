@@ -2,7 +2,7 @@
 -- +migrate StatementBegin
 CREATE TABLE user (
     id VARCHAR(5) PRIMARY KEY,
-    username VARCHAR(25)
+    username VARCHAR(25),
     password VARCHAR(250)
 )
 
