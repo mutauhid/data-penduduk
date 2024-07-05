@@ -4,7 +4,7 @@ CREATE TABLE user (
     id VARCHAR(5) PRIMARY KEY,
     username VARCHAR(25),
     password VARCHAR(250)
-)
+);
 
 CREATE TABLE province (
     id VARCHAR(5) PRIMARY KEY,
