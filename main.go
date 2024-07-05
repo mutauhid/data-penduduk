@@ -25,7 +25,7 @@ func main() {
 	dbPort := os.Getenv("PGPORT")
 	dbUser := os.Getenv("PGUSER")
 	dbPassword := os.Getenv("PGPASSWORD")
-	dbName := os.Getenv("PGNAME")
+	dbName := os.Getenv("PGDATABASE")
 
 	if err != nil {
 		fmt.Println("failed load file environment")
