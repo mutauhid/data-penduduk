@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"data-penduduk/models"
+	"data-penduduk/utils"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -26,9 +27,7 @@ func GetRegency(c *gin.Context) {
 
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
@@ -38,14 +37,12 @@ func GetRegency(c *gin.Context) {
 		var regency models.Regency
 		err := rows.Scan(&regency.ID, &regency.Name, &regency.Province.ID, &regency.Province.ID, &regency.Province.Name, &regency.Province.CreatedAt, &regency.Province.UpdatedAt, &regency.CreatedAt, &regency.UpdatedAt)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
 		regencys = append(regencys, regency)
 	}
-	c.JSON(http.StatusOK, regencys)
+	utils.JSONResponse(c, http.StatusOK, "Success", regencys)
 }
 
 func CreateRegency(c *gin.Context) {
@@ -63,9 +60,7 @@ func CreateRegency(c *gin.Context) {
 		ProvinceID string `json:"province_id"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 	fmt.Println("Request Body:", c.Request.Body)
@@ -74,9 +69,9 @@ func CreateRegency(c *gin.Context) {
 	err := db.QueryRow("SELECT id, name, created_at, updated_at FROM province WHERE id = $1", input.ProvinceID).Scan(&province.ID, &province.Name, &province.CreatedAt, &province.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid province ID"})
+			utils.JSONResponse(c, http.StatusNotFound, "Regency with ID not found", nil)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 		return
 	}
@@ -87,7 +82,7 @@ func CreateRegency(c *gin.Context) {
 	var regencyID string
 	err = db.QueryRow(sqlStatement, input.ID, input.Name, input.ProvinceID, createdAt, updatedAt).Scan(&regencyID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
@@ -99,7 +94,7 @@ func CreateRegency(c *gin.Context) {
 		UpdatedAt: updatedAt,
 	}
 
-	c.JSON(http.StatusOK, regency)
+	utils.JSONResponse(c, http.StatusOK, "Success", regency)
 }
 
 func UpdateRegency(c *gin.Context) {
@@ -120,9 +115,7 @@ func UpdateRegency(c *gin.Context) {
 	var regency models.Regency
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 	regency.UpdatedAt = time.Now()
@@ -131,27 +124,19 @@ func UpdateRegency(c *gin.Context) {
 
 	result, err := db.Exec(sqlStatement, input.Name, input.ProvinceID, regency.UpdatedAt, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Regency with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "Regency with ID not found", nil)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Update Regency Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Update Regency Successfully", nil)
 
 }
 
@@ -161,28 +146,20 @@ func DeleteRegency(c *gin.Context) {
 
 	result, err := db.Exec(sqlStatement, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Regency with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "Regency with ID not found", nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Delete Regency Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Delete Regency Successfully", nil)
 }

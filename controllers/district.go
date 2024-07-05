@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"data-penduduk/models"
+	"data-penduduk/utils"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -28,9 +29,7 @@ func GetDistrict(c *gin.Context) {
 
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
@@ -40,14 +39,12 @@ func GetDistrict(c *gin.Context) {
 		var district models.District
 		err := rows.Scan(&district.ID, &district.Name, &district.Regency.ID, &district.Regency.ID, &district.Regency.Name, &district.Regency.CreatedAt, &district.Regency.UpdatedAt, &district.Regency.Province.ID, &district.Regency.Province.Name, &district.Regency.Province.CreatedAt, &district.Regency.Province.UpdatedAt, &district.CreatedAt, &district.UpdatedAt)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
 		districts = append(districts, district)
 	}
-	c.JSON(http.StatusOK, districts)
+	utils.JSONResponse(c, http.StatusOK, "Success", districts)
 }
 
 func CreateDistrict(c *gin.Context) {
@@ -73,9 +70,7 @@ func CreateDistrict(c *gin.Context) {
 		ProvinceID string `json:"province_id"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
@@ -83,9 +78,9 @@ func CreateDistrict(c *gin.Context) {
 	err := db.QueryRow(sqlRow, input.RegencyID).Scan(&regency.ID, &regency.Name, &regency.Province.ID, &regency.Province.ID, &regency.Province.Name, &regency.Province.CreatedAt, &regency.Province.UpdatedAt, &regency.CreatedAt, &regency.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Regency ID"})
+			utils.JSONResponse(c, http.StatusNotFound, "Invalid Regency ID", nil)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 		return
 	}
@@ -96,7 +91,7 @@ func CreateDistrict(c *gin.Context) {
 	var regencyID string
 	err = db.QueryRow(sqlStatement, input.ID, input.Name, input.RegencyID, createdAt, updatedAt).Scan(&regencyID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
@@ -108,7 +103,7 @@ func CreateDistrict(c *gin.Context) {
 		UpdatedAt: updatedAt,
 	}
 
-	c.JSON(http.StatusOK, district)
+	utils.JSONResponse(c, http.StatusOK, "Success", district)
 }
 
 func UpdateDistrict(c *gin.Context) {
@@ -128,9 +123,7 @@ func UpdateDistrict(c *gin.Context) {
 	var regency models.Regency
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 	regency.UpdatedAt = time.Now()
@@ -139,27 +132,19 @@ func UpdateDistrict(c *gin.Context) {
 
 	result, err := db.Exec(sqlStatement, input.Name, input.RegencyID, regency.UpdatedAt, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "People with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "District with ID not found", nil)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Update Regency Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Update Regency Successfully", nil)
 
 }
 
@@ -169,28 +154,20 @@ func DeleteDistrict(c *gin.Context) {
 
 	result, err := db.Exec(sqlStatement, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "District with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "District with ID not found", nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Delete District Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Delete District Successfully", nil)
 }

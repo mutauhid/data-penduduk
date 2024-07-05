@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"data-penduduk/models"
+	"data-penduduk/utils"
 	"fmt"
 	"net/http"
 	"time"
@@ -16,9 +17,7 @@ func GetProvince(c *gin.Context) {
 
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
@@ -28,23 +27,19 @@ func GetProvince(c *gin.Context) {
 		var province models.Province
 		err := rows.Scan(&province.ID, &province.Name, &province.CreatedAt, &province.UpdatedAt)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
 		provinces = append(provinces, province)
 	}
-	c.JSON(http.StatusOK, provinces)
+	utils.JSONResponse(c, http.StatusOK, "Success", provinces)
 }
 
 func CreateProvince(c *gin.Context) {
 	sqlStatement := `INSERT INTO province (id, name, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id`
 	var province models.Province
 	if err := c.ShouldBindJSON(&province); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
@@ -53,10 +48,10 @@ func CreateProvince(c *gin.Context) {
 
 	err := db.QueryRow(sqlStatement, province.ID, province.Name, province.CreatedAt, province.UpdatedAt).Scan(&province.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	c.JSON(http.StatusOK, province)
+	utils.JSONResponse(c, http.StatusOK, "Success", province)
 }
 
 func UpdateProvince(c *gin.Context) {
@@ -66,9 +61,7 @@ func UpdateProvince(c *gin.Context) {
 	var province models.Province
 
 	if err := c.ShouldBindJSON(&province); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 	province.UpdatedAt = time.Now()
@@ -76,27 +69,19 @@ func UpdateProvince(c *gin.Context) {
 	result, err := db.Exec(sqlStatement, province.Name, province.UpdatedAt, id)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Province with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "Province with ID not found", nil)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Update Province Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Update Province Successfully", nil)
 
 }
 
@@ -106,28 +91,20 @@ func DeleteProvince(c *gin.Context) {
 
 	result, err := db.Exec(sqlStatement, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Province with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "Province with ID not found", nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Delete Province Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Delete Province Successfully", nil)
 }

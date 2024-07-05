@@ -32,7 +32,8 @@ func GetPeople(c *gin.Context) {
 
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
+
 		return
 	}
 	defer rows.Close()
@@ -48,13 +49,13 @@ func GetPeople(c *gin.Context) {
 		)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 			return
 		}
 		peoples = append(peoples, people)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "SUCCESS", "data": peoples})
+	utils.JSONResponse(c, http.StatusOK, "SUCCESS", peoples)
 }
 
 func GetPeopleByNIK(c *gin.Context) {
@@ -86,14 +87,14 @@ func GetPeopleByNIK(c *gin.Context) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "People not found"})
+			utils.JSONResponse(c, http.StatusNotFound, "People not found", nil)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "SUCCESS", "data": people})
+	utils.JSONResponse(c, http.StatusOK, "SUCCESS", people)
 }
 
 func CreatePeople(c *gin.Context) {
@@ -111,14 +112,13 @@ func CreatePeople(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&people); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
+
 		return
 	}
 	dob, err := time.Parse("2006-Jan-02", people.DOB)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use YYYY-MM-DD."})
+		utils.JSONResponse(c, http.StatusBadRequest, "Invalid date format. Use YYYY-MM-DD.", nil)
 		return
 	}
 
@@ -138,13 +138,13 @@ func CreatePeople(c *gin.Context) {
 	newPerson.NIK = utils.GenerateNIK(newPerson)
 	err = db.QueryRow(sqlStatement, newPerson.ID, newPerson.NIK, newPerson.Name, newPerson.Gender, newPerson.DOB, newPerson.POB, newPerson.ProvinceID, newPerson.RegencyID, newPerson.DistrictID, newPerson.CreatedAt, newPerson.UpdatedAt).Scan(&newPerson.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	newPerson.CreatedAt = time.Now()
 	newPerson.UpdatedAt = time.Now()
-	c.JSON(http.StatusOK, newPerson)
+	utils.JSONResponse(c, http.StatusOK, "Success", newPerson)
 }
 
 func UpdatePeople(c *gin.Context) {
@@ -153,36 +153,28 @@ func UpdatePeople(c *gin.Context) {
 	var people models.People
 
 	if err := c.ShouldBindJSON(&people); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
+
 		return
 	}
 	people.UpdatedAt = time.Now()
 
 	result, err := db.Exec(sqlStatement, people.Name, people.ProvinceID, people.RegencyID, people.DistrictID, people.UpdatedAt, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "People with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "People with ID not found", nil)
+
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Update People Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Update People Successfully", nil)
 
 }
 
@@ -192,28 +184,20 @@ func DeletePeople(c *gin.Context) {
 
 	result, err := db.Exec(sqlStatement, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "People with ID not found",
-		})
+		utils.JSONResponse(c, http.StatusNotFound, "People with ID not found", nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Delete People Successfully",
-	})
+	utils.JSONResponse(c, http.StatusOK, "Delete People Successfully", nil)
 }

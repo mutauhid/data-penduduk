@@ -17,13 +17,13 @@ var JwtSecret = []byte("secret_key")
 func Register(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 	user.Password = string(hashedPassword)
@@ -32,18 +32,18 @@ func Register(c *gin.Context) {
 	sqlStatement := `INSERT INTO users (id, username, password) VALUES ($1, $2, $3)`
 	_, err = db.Exec(sqlStatement, user.ID, user.Username, user.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
+	utils.JSONResponse(c, http.StatusOK, "Registration Success", nil)
 
 }
 
 func Login(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
@@ -52,16 +52,16 @@ func Login(c *gin.Context) {
 	err := db.QueryRow(sqlStatement, user.Username).Scan(&storedUser.ID, &storedUser.Username, &storedUser.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+			utils.JSONResponse(c, http.StatusUnauthorized, "Invalid username or password", nil)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		}
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		utils.JSONResponse(c, http.StatusUnauthorized, "Invalid username or password", nil)
 		return
 	}
 
@@ -72,7 +72,7 @@ func Login(c *gin.Context) {
 
 	tokenString, err := token.SignedString(JwtSecret)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
 
