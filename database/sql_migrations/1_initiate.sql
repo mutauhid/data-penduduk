@@ -1,9 +1,9 @@
 -- +migrate Up
 -- +migrate StatementBegin
-CREATE TABLE user (
+CREATE TABLE users (
     id VARCHAR(5) PRIMARY KEY,
-    username VARCHAR(25),
-    password VARCHAR(250)
+    username VARCHAR(25) NOT NULL,
+    password VARCHAR(250) NOT NULL
 );
 
 CREATE TABLE province (

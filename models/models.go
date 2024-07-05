@@ -42,7 +42,7 @@ type People struct {
 	UpdatedAt  time.Time `json:"updated_at,omitempty"`
 }
 
-type User struct {
+type Users struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`

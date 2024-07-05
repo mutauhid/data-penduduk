@@ -15,7 +15,7 @@ import (
 var JwtSecret = []byte("secret_key")
 
 func Register(c *gin.Context) {
-	var user models.User
+	var user models.Users
 	if err := c.ShouldBindJSON(&user); err != nil {
 		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
@@ -41,13 +41,13 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	var user models.User
+	var user models.Users
 	if err := c.ShouldBindJSON(&user); err != nil {
 		utils.JSONResponse(c, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
-	var storedUser models.User
+	var storedUser models.Users
 	sqlStatement := `SELECT id, username, password FROM users WHERE username = $1`
 	err := db.QueryRow(sqlStatement, user.Username).Scan(&storedUser.ID, &storedUser.Username, &storedUser.Password)
 	if err != nil {
