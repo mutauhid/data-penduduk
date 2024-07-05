@@ -23,7 +23,7 @@ func GenerateNIK(people models.People) string {
 	var month = split[1]
 	var date = split[0]
 	fmt.Println("datesplit", date)
-	if people.Gender == "wanita" {
+	if people.Gender == "wanita" || people.Gender == "perempuan" {
 		dateInt, _ := strconv.Atoi(date)
 		fmt.Println(dateInt)
 		dateInt += 40
