@@ -69,7 +69,7 @@ func CreateRegency(c *gin.Context) {
 	err := db.QueryRow("SELECT id, name, created_at, updated_at FROM province WHERE id = $1", input.ProvinceID).Scan(&province.ID, &province.Name, &province.CreatedAt, &province.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			utils.JSONResponse(c, http.StatusNotFound, "Regency with ID not found", nil)
+			utils.JSONResponse(c, http.StatusNotFound, "Invalid Province ID", nil)
 		} else {
 			utils.JSONResponse(c, http.StatusInternalServerError, err.Error(), nil)
 		}

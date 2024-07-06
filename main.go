@@ -55,19 +55,19 @@ func main() {
 
 	// router province
 	router.GET("/province", controllers.GetProvince)
-	router.POST("/province", controllers.CreateProvince)
+	router.POST("/province", middleware.AuthMiddleware(), controllers.CreateProvince)
 	router.PUT("/province/:id", middleware.AuthMiddleware(), controllers.UpdateProvince)
 	router.DELETE("/province/:id", middleware.AuthMiddleware(), controllers.DeleteProvince)
 
 	//router regency
 	router.GET("/regency", controllers.GetRegency)
-	router.POST("/regency", controllers.CreateRegency)
+	router.POST("/regency", middleware.AuthMiddleware(), controllers.CreateRegency)
 	router.PUT("/regency/:id", middleware.AuthMiddleware(), controllers.UpdateRegency)
 	router.DELETE("/regency/:id", middleware.AuthMiddleware(), controllers.DeleteRegency)
 
 	//router district
 	router.GET("/district", controllers.GetDistrict)
-	router.POST("/district", controllers.CreateDistrict)
+	router.POST("/district", middleware.AuthMiddleware(), controllers.CreateDistrict)
 	router.PUT("/district/:id", middleware.AuthMiddleware(), controllers.UpdateDistrict)
 	router.DELETE("/district/:id", middleware.AuthMiddleware(), controllers.DeleteDistrict)
 
