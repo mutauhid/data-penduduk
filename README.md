@@ -135,10 +135,10 @@ Data penduduk adalah API untuk mengelola data penduduk termasuk provinsi, kabupa
  {
     "name": "Taufik Updated",
     "province_id": "02",
-    "regency_id": "0202",
+    "regency_id": "02",
     "district_id": "01"
 }
 ```
 #### 5. Menghapus People
 - **Method:** DELETE
-- **Endpoint:** `/regency/:id`
+- **Endpoint:** `/people/:id`
